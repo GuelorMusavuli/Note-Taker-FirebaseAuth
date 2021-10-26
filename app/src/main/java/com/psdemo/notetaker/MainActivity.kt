@@ -50,7 +50,8 @@ class MainActivity : AppCompatActivity() {
         // If the user chooses to use their email,
         // they will need to create a password as well.
         val providers = arrayListOf(
-            AuthUI.IdpConfig.EmailBuilder().build()
+            AuthUI.IdpConfig.EmailBuilder().build(),
+            AuthUI.IdpConfig.GoogleBuilder().build()
         )
 
         // Create and launch pre-built UI sign-in Activity.
@@ -60,6 +61,7 @@ class MainActivity : AppCompatActivity() {
         val signInIntent = AuthUI.getInstance()
             .createSignInIntentBuilder()
             .setAvailableProviders(providers)
+            .setIsSmartLockEnabled(!BuildConfig.DEBUG, true)
             .build()
         startActivityForResult(signInIntent, RC_SIGN_IN)
 
