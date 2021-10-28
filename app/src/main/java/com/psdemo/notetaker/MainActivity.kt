@@ -111,6 +111,7 @@ class MainActivity : AppCompatActivity() {
             .setAvailableProviders(providers)
             .setIsSmartLockEnabled(!BuildConfig.DEBUG, true)
             .enableAnonymousUsersAutoUpgrade()//Tell the AuthUI to automatically convert anonymous accounts to standard ones.
+            .setTheme(R.style.SignInTheme)
             .build()
         startActivityForResult(signInIntent, RC_SIGN_IN)
 
