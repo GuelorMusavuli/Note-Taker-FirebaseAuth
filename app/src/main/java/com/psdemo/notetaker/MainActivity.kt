@@ -2,8 +2,10 @@ package com.psdemo.notetaker
 
 import android.app.Activity
 import android.content.Intent
+
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.firebase.ui.auth.AuthUI
 import com.firebase.ui.auth.IdpResponse
@@ -19,15 +21,15 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-       //Initialize firebase authentication
+        //Initialize firebase authentication
         // to support the sign-in providers
         auth = FirebaseAuth.getInstance()
 
-        //Wire up the FirebaseAuth to the sign-in Button
-        btnSignIn.setOnClickListener {
-            launchSignInFlow()
-        }
+        //Wire up the traditional authentication  to the sign-in Button
+        btnSignIn.setOnClickListener { launchSignInFlow() }
 
+        //Wire up the anonymous authentication to the skip btn
+        btnSkip.setOnClickListener { signInAnonymously() }
 
     }
 
@@ -37,12 +39,27 @@ class MainActivity : AppCompatActivity() {
         super.onStart()
         // Check if user is signed in (non-null) and update UI accordingly.
         val currentUser = auth.currentUser
-        if(currentUser != null){
+        if (currentUser != null && !currentUser.isAnonymous) {
             val intent = Intent(this, ListActivity::class.java)
             intent.putExtra(USER_ID, currentUser.uid)
             startActivity(intent)
         }
     }
+
+    //Enabling anonymous authentication
+    private fun signInAnonymously() {
+        auth.signInAnonymously()
+            .addOnCompleteListener {
+                //Captures the response complete event and passes it to the  lamba fun
+                if (it.isSuccessful) {
+                    loadListActivity()
+                } else {
+                    Log.e(TAG, "Anonymous sign-in failed", it.exception)
+                    Toast.makeText(this, "Sign-in failed", Toast.LENGTH_LONG).show()
+                }
+            }
+    }
+
 
     private fun launchSignInFlow() {
 
@@ -60,7 +77,7 @@ class MainActivity : AppCompatActivity() {
             AuthUI.IdpConfig.EmailBuilder().build(),
             AuthUI.IdpConfig.GoogleBuilder().build(),
             AuthUI.IdpConfig.FacebookBuilder().build(),
-           // AuthUI.IdpConfig.PhoneBuilder().setDefaultCountryIso("AU").build()
+            // AuthUI.IdpConfig.PhoneBuilder().setDefaultCountryIso("AU").build()
             AuthUI.IdpConfig.PhoneBuilder().setWhitelistedCountries(countries).build()
         )
 
@@ -72,6 +89,7 @@ class MainActivity : AppCompatActivity() {
             .createSignInIntentBuilder()
             .setAvailableProviders(providers)
             .setIsSmartLockEnabled(!BuildConfig.DEBUG, true)
+            .enableAnonymousUsersAutoUpgrade()//Tell the AuthUI to automatically convert anonymous accounts to standard ones.
             .build()
         startActivityForResult(signInIntent, RC_SIGN_IN)
 
@@ -90,30 +108,32 @@ class MainActivity : AppCompatActivity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
-        if (RC_SIGN_IN == 15){
+        if (RC_SIGN_IN == 15) {
             //Get and parse the response from the intent result and parse
             val response = IdpResponse.fromResultIntent(data)
 
             //Check whether or not the  AuthUI flow was successful via the resultCode
             if (resultCode == Activity.RESULT_OK) {
 
-                // load the notes upon user successfully signed in
-                val user = FirebaseAuth.getInstance().currentUser
-                val intent = Intent(this, ListActivity::class.java)
-                intent.putExtra(USER_ID, user!!.uid)
-                startActivity(intent)
-
+                loadListActivity() // load the notes upon sign - in success.
                 Log.i(
-                    TAG, "Successfully signed in user " +
-                            "${FirebaseAuth.getInstance().currentUser?.displayName}"
+                    TAG,
+                    "Successfully signed in user ${FirebaseAuth.getInstance().currentUser?.displayName}"
                 )
-            }else{
+            } else {
                 // Sign in failed. If response is null the user canceled the
                 // sign-in flow using the back button.
                 Log.e(TAG, "Sign-in failed ${response?.error?.errorCode}")
 
             }
         }
+    }
+
+    private fun loadListActivity() {
+        val user = FirebaseAuth.getInstance().currentUser
+        val intent = Intent(this, ListActivity::class.java)
+        intent.putExtra(USER_ID, user!!.uid)
+        startActivity(intent)
     }
 
 }

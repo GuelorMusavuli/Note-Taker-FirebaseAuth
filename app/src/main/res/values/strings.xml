@@ -12,4 +12,5 @@
     <string name="facebook_application_id" translatable="false">606945387155258</string>
    <!-- this allows the sign-in process to use chrome's custom tab and provide a smooth UX-->
     <string name="facebook_login_protocol_scheme" translatable="false">fb606945387155258</string>
+    <string name="skip">Skip</string>
 </resources>
