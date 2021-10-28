@@ -46,13 +46,22 @@ class MainActivity : AppCompatActivity() {
 
     private fun launchSignInFlow() {
 
+        //Whitelist array for specific countries rather than the whole world
+        val countries = arrayListOf<String>()
+        countries.add("UG")
+        countries.add("CD")
+        countries.add("RW")
+
+
         // Choose authentication providers for the user to sign-in
         // If the user chooses to use their email,
         // they will need to create a password as well.
         val providers = arrayListOf(
             AuthUI.IdpConfig.EmailBuilder().build(),
             AuthUI.IdpConfig.GoogleBuilder().build(),
-            AuthUI.IdpConfig.FacebookBuilder().build()
+            AuthUI.IdpConfig.FacebookBuilder().build(),
+           // AuthUI.IdpConfig.PhoneBuilder().setDefaultCountryIso("AU").build()
+            AuthUI.IdpConfig.PhoneBuilder().setWhitelistedCountries(countries).build()
         )
 
         // Create and launch pre-built UI sign-in Activity.
