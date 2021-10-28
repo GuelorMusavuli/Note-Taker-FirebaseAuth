@@ -18,6 +18,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var auth: FirebaseAuth
     private val TAG = MainActivity::class.qualifiedName
+    private var referred = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,6 +35,7 @@ class MainActivity : AppCompatActivity() {
         if (intent.hasExtra(SIGN_IN_MESSAGE)){
             btnSkip.visibility = INVISIBLE
             tvMessage.text = intent.getStringExtra(SIGN_IN_MESSAGE)
+            referred = true // when this activity was referred by another that requires sign-in
         }else{
             //Wire up the anonymous authentication to the skip btn
             btnSkip.setOnClickListener { signInAnonymously() }
@@ -122,7 +124,7 @@ class MainActivity : AppCompatActivity() {
 
     /**
      * Handle the result that comes back from the AuthUI intent
-     * once the user has completed the flow.
+     * once the user has completed the sign-in process.
      * */
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
@@ -134,11 +136,19 @@ class MainActivity : AppCompatActivity() {
             //Check whether or not the  AuthUI flow was successful via the resultCode
             if (resultCode == Activity.RESULT_OK) {
 
-                loadListActivity() // load the notes upon sign - in success.
-                Log.i(
-                    TAG,
-                    "Successfully signed in user ${FirebaseAuth.getInstance().currentUser?.displayName}"
-                )
+                //Inform the calling activity that this one has completed successfully
+                if(referred){
+                    setResult(Activity.RESULT_OK)
+                    finish()
+                }else{
+                    Log.i(
+                        TAG,
+                        "Successfully signed in user ${FirebaseAuth.getInstance().currentUser?.displayName}"
+                    )
+                    loadListActivity() // load the notes upon sign - in success.
+                }
+
+
             } else {
                 // Sign in failed. If response is null the user canceled the
                 // sign-in flow using the back button.
