@@ -10,6 +10,7 @@ import android.view.View.INVISIBLE
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.firebase.ui.auth.AuthUI
+import com.firebase.ui.auth.ErrorCodes
 import com.firebase.ui.auth.IdpResponse
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.android.synthetic.main.activity_main.*
@@ -32,11 +33,11 @@ class MainActivity : AppCompatActivity() {
         btnSignIn.setOnClickListener { launchSignInFlow() }
 
         //Check if the calling activity sent a sign-in message
-        if (intent.hasExtra(SIGN_IN_MESSAGE)){
+        if (intent.hasExtra(SIGN_IN_MESSAGE)) {
             btnSkip.visibility = INVISIBLE
             tvMessage.text = intent.getStringExtra(SIGN_IN_MESSAGE)
             referred = true // when this activity was referred by another that requires sign-in
-        }else{
+        } else {
             //Wire up the anonymous authentication to the skip btn
             btnSkip.setOnClickListener { signInAnonymously() }
         }
@@ -137,10 +138,10 @@ class MainActivity : AppCompatActivity() {
             if (resultCode == Activity.RESULT_OK) {
 
                 //Inform the calling activity that this one has completed successfully
-                if(referred){
+                if (referred) {
                     setResult(Activity.RESULT_OK)
                     finish()
-                }else{
+                } else {
                     Log.i(
                         TAG,
                         "Successfully signed in user ${FirebaseAuth.getInstance().currentUser?.displayName}"
@@ -150,9 +151,42 @@ class MainActivity : AppCompatActivity() {
 
 
             } else {
-                // Sign in failed. If response is null the user canceled the
-                // sign-in flow using the back button.
-                Log.e(TAG, "Sign-in failed ${response?.error?.errorCode}")
+                // Sign in failed due to merge conflict.
+                if (response != null && response.error != null &&
+                    response.error!!.errorCode == ErrorCodes.ANONYMOUS_UPGRADE_MERGE_CONFLICT
+                ) {
+                    //save temporarily any data associated with the anonymous user
+                    // so that it can be associated with the existing account that the user
+                    // is trying to log into, and then re-save it tied to the new account.
+                    val existingCredential = response.credentialForLinking
+                    if (existingCredential != null) {
+                        auth.signInWithCredential(existingCredential)
+                            .addOnSuccessListener {
+                                if (referred) {
+                                    val user = auth.currentUser
+                                    val intentUser = Intent()
+                                    intentUser.putExtra(USER_ID, user!!.uid)
+                                    setResult(Activity.RESULT_OK, intentUser)
+                                    finish() //go back to NewNoteActivity
+                                } else {
+                                    //here this activity wasn't skipped.
+                                    // Head straight to ListActivity
+                                    loadListActivity()
+                                }
+                            }
+                    }
+
+
+                }
+
+                // If sign-in failed for a reason other than anonymous merge conflict.
+                // Here we are not notifying users that their sign-in failed when they
+                // just cancelled instead. Moreover, the message shouldn't be displayed
+                // on success sign-in either.
+                if (resultCode != Activity.RESULT_CANCELED && resultCode != Activity.RESULT_OK) {
+                    Log.e(TAG, "Sign-in failed", response?.error)
+                    Toast.makeText(this, "Sign-in failed", Toast.LENGTH_LONG).show()
+                }
 
             }
         }

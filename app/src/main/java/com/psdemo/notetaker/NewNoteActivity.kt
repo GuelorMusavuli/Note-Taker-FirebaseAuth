@@ -7,9 +7,12 @@ import android.text.TextUtils
 import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.auth.FirebaseAuth
 import com.psdemo.notetaker.MainActivity.Companion.SIGN_IN_MESSAGE
+import com.psdemo.notetaker.MainActivity.Companion.USER_ID
 import kotlinx.android.synthetic.main.activity_new_note.*
 
 class NewNoteActivity : AppCompatActivity() {
+
+    var userId = "-1"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -23,6 +26,7 @@ class NewNoteActivity : AppCompatActivity() {
             startActivityForResult(intent, ATTEMPT_SIGNIN)
         }
 
+        //Receiving UID from MainActivity
 
         btnSave.setOnClickListener {
             val resultIntent = Intent()
@@ -35,6 +39,7 @@ class NewNoteActivity : AppCompatActivity() {
 
                 resultIntent.putExtra(NEW_TITLE, title)
                 resultIntent.putExtra(NEW_BODY, body)
+                resultIntent.putExtra(USER_ID, userId)
                 setResult(Activity.RESULT_OK, resultIntent)
             }
             finish()
@@ -47,6 +52,9 @@ class NewNoteActivity : AppCompatActivity() {
             // Hence, exit this activity to prevent them from proceeding and adding a new note.
             finish()
         }else{
+            if (data != null && data.hasExtra(USER_ID)){
+                userId = data.getStringExtra(USER_ID)
+            }
             //Handle the result
             super.onActivityResult(requestCode, resultCode, data)
         }

@@ -13,6 +13,7 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.firebase.firestore.*
 import com.google.firebase.firestore.EventListener
+import com.psdemo.notetaker.MainActivity.Companion.USER_ID
 import com.psdemo.notetaker.data.Note
 import com.psdemo.notetaker.data.NoteViewModel
 import kotlinx.android.synthetic.main.activity_list.*
@@ -33,7 +34,7 @@ class ListActivity : AppCompatActivity() {
         setContentView(R.layout.activity_list)
         setSupportActionBar(toolbar)
 
-        userId = intent.getStringExtra(MainActivity.USER_ID)
+        userId = intent.getStringExtra(USER_ID)
 
         fab.setOnClickListener {
             val activityIntent = Intent(this, NewNoteActivity::class.java)
@@ -68,6 +69,16 @@ class ListActivity : AppCompatActivity() {
             val body = data.getStringExtra(NewNoteActivity.NEW_BODY)
 
             val note = Note(id, title, body, Calendar.getInstance().timeInMillis, false)
+
+            //Check if the result from NewNoteActivity has a USER_ID in it
+            if (data.hasExtra(USER_ID) &&
+                data.getStringExtra(USER_ID) != userId &&
+                data.getStringExtra(USER_ID) != "-1"
+            ) {
+                userId = data.getStringExtra(USER_ID)
+                loadData()
+            }
+
 
             if (userId == "-1") {
                 noteViewModel.insert(note)
