@@ -51,7 +51,8 @@ class MainActivity : AppCompatActivity() {
         // they will need to create a password as well.
         val providers = arrayListOf(
             AuthUI.IdpConfig.EmailBuilder().build(),
-            AuthUI.IdpConfig.GoogleBuilder().build()
+            AuthUI.IdpConfig.GoogleBuilder().build(),
+            AuthUI.IdpConfig.FacebookBuilder().build()
         )
 
         // Create and launch pre-built UI sign-in Activity.
