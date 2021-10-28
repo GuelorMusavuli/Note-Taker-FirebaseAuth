@@ -2,9 +2,11 @@ package com.psdemo.notetaker
 
 import android.app.Activity
 import android.content.Intent
+import android.opengl.Visibility
 
 import android.os.Bundle
 import android.util.Log
+import android.view.View.INVISIBLE
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.firebase.ui.auth.AuthUI
@@ -28,8 +30,14 @@ class MainActivity : AppCompatActivity() {
         //Wire up the traditional authentication  to the sign-in Button
         btnSignIn.setOnClickListener { launchSignInFlow() }
 
-        //Wire up the anonymous authentication to the skip btn
-        btnSkip.setOnClickListener { signInAnonymously() }
+        //Check if the calling activity sent a sign-in message
+        if (intent.hasExtra(SIGN_IN_MESSAGE)){
+            btnSkip.visibility = INVISIBLE
+            tvMessage.text = intent.getStringExtra(SIGN_IN_MESSAGE)
+        }else{
+            //Wire up the anonymous authentication to the skip btn
+            btnSkip.setOnClickListener { signInAnonymously() }
+        }
 
     }
 
@@ -44,6 +52,16 @@ class MainActivity : AppCompatActivity() {
             intent.putExtra(USER_ID, currentUser.uid)
             startActivity(intent)
         }
+    }
+
+    /**
+     * Set the result of the calling activity to canceled.
+     * This will signal to original activity that the sign-in was aborted and
+     * not to show the intended functionality.(addNewNote)
+     * */
+    override fun onBackPressed() {
+        setResult(Activity.RESULT_CANCELED)
+        finish()
     }
 
     //Enabling anonymous authentication
@@ -98,6 +116,7 @@ class MainActivity : AppCompatActivity() {
     companion object {
         const val USER_ID = "user_id"
         const val RC_SIGN_IN = 15
+        const val SIGN_IN_MESSAGE = "sign_in_message"
     }
 
 
