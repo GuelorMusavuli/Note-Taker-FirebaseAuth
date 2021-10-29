@@ -29,6 +29,18 @@ class MainActivity : AppCompatActivity() {
         // to support the sign-in providers
         auth = FirebaseAuth.getInstance()
 
+        //Check the current state of the user to prevent them
+        // from having to sign-in every time they launch the app
+        // If user is signed in. update UI accordingly.
+        val currentUser = auth.currentUser
+        if (currentUser != null && !currentUser.isAnonymous
+            && currentUser.providers?.size ?: 0 > 0) {
+
+            val intent = Intent(this, ListActivity::class.java)
+            intent.putExtra(USER_ID, currentUser.uid)
+            startActivity(intent)
+        }
+
         //Wire up the traditional authentication  to the sign-in Button
         btnSignIn.setOnClickListener { launchSignInFlow() }
 
@@ -42,19 +54,6 @@ class MainActivity : AppCompatActivity() {
             btnSkip.setOnClickListener { signInAnonymously() }
         }
 
-    }
-
-    //Check the current state of the user to prevent them
-    // from having to sign-in every time they launch the app
-    public override fun onStart() {
-        super.onStart()
-        // Check if user is signed in (non-null) and update UI accordingly.
-        val currentUser = auth.currentUser
-        if (currentUser != null && !currentUser.isAnonymous) {
-            val intent = Intent(this, ListActivity::class.java)
-            intent.putExtra(USER_ID, currentUser.uid)
-            startActivity(intent)
-        }
     }
 
     /**
