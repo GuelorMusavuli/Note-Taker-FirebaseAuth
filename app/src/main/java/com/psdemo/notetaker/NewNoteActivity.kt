@@ -10,23 +10,13 @@ import com.psdemo.notetaker.MainActivity.Companion.SIGN_IN_MESSAGE
 import com.psdemo.notetaker.MainActivity.Companion.USER_ID
 import kotlinx.android.synthetic.main.activity_new_note.*
 
-class NewNoteActivity : AppCompatActivity() {
+class NewNoteActivity : BaseActivity() {
 
-    var userId = "-1"
-
-    override fun onCreate(savedInstanceState: Bundle?) {
+       override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_new_note)
 
-        //Prompt the user to sign-in in order to create a new note
-        val user = FirebaseAuth.getInstance().currentUser
-        if (user == null || user.isAnonymous) {
-            val intent = Intent(this, MainActivity::class.java)
-            intent.putExtra(SIGN_IN_MESSAGE, "Sign-in to create a new note")
-            startActivityForResult(intent, ATTEMPT_SIGNIN)
-        }
-
-        //Receiving UID from MainActivity
+        signInMessage = "Sign-in to create a new note"
 
         btnSave.setOnClickListener {
             val resultIntent = Intent()
@@ -46,23 +36,8 @@ class NewNoteActivity : AppCompatActivity() {
         }
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        if (requestCode == ATTEMPT_SIGNIN && resultCode == Activity.RESULT_CANCELED) {
-            //The user terminate the sign-in flow prior to completion,
-            // Hence, exit this activity to prevent them from proceeding and adding a new note.
-            finish()
-        }else{
-            if (data != null && data.hasExtra(USER_ID)){
-                userId = data.getStringExtra(USER_ID)
-            }
-            //Handle the result
-            super.onActivityResult(requestCode, resultCode, data)
-        }
-    }
-
     companion object {
         const val NEW_TITLE = "new_title"
         const val NEW_BODY = "new_body"
-        const val ATTEMPT_SIGNIN = 10 //Notify newNoteActivity once mainActivity Completes
     }
 }
