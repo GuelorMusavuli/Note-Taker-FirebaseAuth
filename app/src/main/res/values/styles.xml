@@ -15,6 +15,16 @@
         <item name="windowNoTitle">true</item>
     </style>
 
+
+    <style name="ButtonTheme" parent="Widget.MaterialComponents.Button.TextButton" >
+        <item name="android:textColor">@color/colorAccent</item>
+    </style>
+
+    <style name="DialogTheme" parent="ThemeOverlay.MaterialComponents.Dialog.Alert" >
+        <item name="buttonBarNegativeButtonStyle">@style/ButtonTheme</item>
+        <item name="buttonBarPositiveButtonStyle">@style/ButtonTheme</item>
+    </style>
+
     <style name="AppTheme.NoActionBar">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>

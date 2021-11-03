@@ -20,8 +20,13 @@ open class BaseActivity : AppCompatActivity(){
     override fun onResume() {
         super.onResume()
 
+<<<<<<< HEAD
         //Redirects the user to MainActivity
         // if they are not signed-in to create a new note
+=======
+        //Redirects the users to MainActivity
+        // if they no signed-in to create a new note
+>>>>>>> tmp
         currentUser = FirebaseAuth.getInstance().currentUser
         if (currentUser == null || currentUser?.isAnonymous != false
             || currentUser?.providers?.size ?: 0 == 0 ) {
