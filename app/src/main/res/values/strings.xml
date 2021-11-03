@@ -12,6 +12,11 @@
     <string name="facebook_application_id" translatable="false">606945387155258</string>
    <!-- this allows the sign-in process to use chrome's custom tab and provide a smooth UX-->
     <string name="facebook_login_protocol_scheme" translatable="false">fb606945387155258</string>
+
     <string name="skip">Skip</string>
     <string name="sign_in_default_message">Sign-in to get started</string>
+    <string name="title_activity_settings">Settings</string>
+    <string name="name">Name</string>
+    <string name="delete">Delete Account</string>
+    <string name="sign_out">Sign-out</string>
 </resources>
